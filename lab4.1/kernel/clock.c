@@ -1,0 +1,43 @@
+
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+                               clock.c
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+                                                    Forrest Yu, 2005
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+
+#include "type.h"
+#include "const.h"
+#include "protect.h"
+#include "proto.h"
+#include "string.h"
+#include "proc.h"
+#include "global.h"
+
+
+/*======================================================================*
+                           clock_handler
+ *======================================================================*/
+PUBLIC void clock_handler(int irq)
+{
+	ticks++;
+	p_proc_ready->ticks--;
+        for(int i=0;i<NR_TASKS;i++){
+                PROCESS* p_proc=proc_table+i;
+                if(p_proc->sleep_ticks>0){
+                        p_proc->sleep_ticks--;
+                }
+
+        }
+	schedule();
+}
+
+/*======================================================================*
+                              milli_delay
+ *======================================================================*/
+PUBLIC void milli_delay(int milli_sec)
+{
+        int t = get_ticks();
+
+        while(((get_ticks() - t) * 1000 / HZ) < milli_sec) {}
+}
+
